@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
-import TimeAgo from 'react-timeago';
-import LazyLoad from 'react-lazy-load'; //https://www.npmjs.com/package/react-lazy-load
+// import TimeAgo from 'react-timeago';
+ import LazyLoad from 'react-lazy-load'; //https://www.npmjs.com/package/react-lazy-load
 import logo from './logo.svg';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.css';
 
-const apiurl = "https://randomuser.me/api/?results=960";
+//const apiurl = "https://randomuser.me/api/?results=960";
+const apiurl = "https://api.github.com/users?since=";
 
 function ReactHeader(props) {
   return (
@@ -34,6 +35,9 @@ function ErrorDisplay(props) {
       </h4>
     </div>)
 }
+function getRandomInt(max) {
+  return Math.floor(Math.random() * Math.floor(max));
+}
 
 class CardsList extends Component {
   constructor(props) {
@@ -44,16 +48,18 @@ class CardsList extends Component {
       error: null
     };
   }
+  
   componentDidMount() {
     this.setState({ isLoading: true });
-    fetch(apiurl)
+    fetch(apiurl+getRandomInt(500))
       .then(response => {
         if (response.ok)
           return response.json();
         else
           throw new Error("Something went wrong");
       })
-      .then(data => this.setState({ users: data.results, isLoading: false }))
+      //.then(data => this.setState({ users: data.results, isLoading: false }))
+      .then(data => this.setState({ users: data, isLoading: false }))
       .catch(error => this.setState({ error, isLoading: false }));
     console.log("state", this.state.users);
   }
@@ -66,21 +72,21 @@ class CardsList extends Component {
     return (
       <div className="row">
         {users.map(user =>
-          <div key={user.cell} className="col-sm-12 col-md-6 col-lg-4 mt-4">
+          <div key={user.id} className="col-sm-12 col-md-6 col-lg-4 mt-4">
             <div className="card text-center">
               <h3 className="card-header">
-                {user.name.first} {user.name.last}
+                {user.login}
               </h3>
               <div className="card-body">
-                {/* <LazyLoad> */}
-                  <img src={user.picture.large} className="img-thumbnail" alt={user.name.firstname} title={user.name.firstname}></img>
-                {/* </LazyLoad> */}
-                <h6 className="card-title">{user.location.city}</h6>
-                <div className="card-text">{user.location.street}</div>
-                <div>{user.email}</div>
+                <LazyLoad>
+                  <img src={user.avatar_url} width="160" className="img-thumbnail" alt={user.login} title={user.login}></img>
+                </LazyLoad>
+                <h6 className="card-title">{user.type}</h6>
+                {/* IsSiteAdmin:<div className="card-text">{user.site_admin}</div> */}
               </div>
               <div className="card-footer text-muted small">
-                Registered on {user.registered.date}<br />(<TimeAgo date={user.registered.date} />)
+              <div><a href={user.html_url} target="_blank">{user.html_url}</a></div>
+                {/* Registered on {user.registered.date}<br />(<TimeAgo date={user.registered.date} />) */}
               </div>
             </div>
           </div>
